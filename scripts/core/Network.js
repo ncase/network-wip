@@ -1,20 +1,27 @@
-// Create a model + centered container SVG.
-var modelSVG = Snap("#model");
-var matrix = new Snap.Matrix();
-matrix.translate(modelSVG.node.clientWidth/2, modelSVG.node.clientHeight/2);
-var containerSVG = modelSVG.group().attr({ transform:matrix });
-
-// Edges below nodes
-var edgesSVG = containerSVG.group();
-var nodesSVG = containerSVG.group();
+(function(exports){
 
 //////////////////////////
 // CREATING THE NETWORK //
 //////////////////////////
 
-window.Network = {};
+exports.Network = {};
 
+// Create a model + centered container SVG.
+exports.modelSVG = Snap("#model");
+var matrix = new Snap.Matrix();
+matrix.translate(modelSVG.node.clientWidth/2, modelSVG.node.clientHeight/2-20);
+matrix.scale(2);
+Network.matrix = matrix;
+var containerSVG = modelSVG.group().attr({ transform:matrix });
+
+// Edges below nodes
+exports.edgesSVG = containerSVG.group();
+exports.nodesSVG = containerSVG.group();
+
+// Init
 Network.init = function(config){
+
+	Network.config = config;
 
 	// Clear arrays & SVG
 	nodesSVG.clear();
@@ -31,6 +38,7 @@ Network.init = function(config){
 
 };
 
+// Next Stage
 Network.nextStage = function(){
 
 	// Get next stage
@@ -40,8 +48,8 @@ Network.nextStage = function(){
 	var stage = Network.stage;
 
 	// Random placement
-	var _random = function(){
-		return Math.random()*10-5;
+	var _random = function(amount){
+		return (Math.random()-0.5)*amount;
 	};
 
 	// Create new nodes
@@ -50,8 +58,9 @@ Network.nextStage = function(){
 		var n = stage.nodes[i];
 		var node = new Node({
 			id: n.id,
-			x: n.x || _random(),
-			y: n.y || _random()
+			type: n.type,
+			x: n.x || _random(400),
+			y: n.y || _random(400)
 		});
 		newNodes.push(node);
 		nodes.push(node);
@@ -63,6 +72,7 @@ Network.nextStage = function(){
 		var from = Node.getById(e.from);
 		var to = Node.getById(e.to);
 		var edge = new Edge({
+			type: e.type,
 			from: from,
 			to: to
 		});
@@ -71,18 +81,18 @@ Network.nextStage = function(){
 		// If exactly one of those nodes are new,
 		// have it "spring" off the existing node
 		if(newNodes.indexOf(from)<0 && newNodes.indexOf(to)>=0){
-			to.x = from.x + _random();
-			to.y = from.y + _random();
+			to.x = from.x + _random(5);
+			to.y = from.y + _random(5);
 		}else if(newNodes.indexOf(to)<0 && newNodes.indexOf(from)>=0){
-			from.x = to.x + _random();
-			from.y = to.y + _random();
+			from.x = to.x + _random(5);
+			from.y = to.y + _random(5);
 		}
 
 	}
 
 };
 
-// RANDOM UPDATING
+// UPDATING
 var updateIndex = 0;
 function update(){
 
@@ -94,5 +104,14 @@ function update(){
 	}
 
 }
-
 setInterval(update,1000/60);
+
+// Art...
+Network.getNodeArt = function(nodeType){
+	return Network.config.art.nodes[nodeType];
+};
+Network.getEdgeArt = function(edgeType){
+	return Network.config.art.edges[edgeType];
+};
+
+})(window);

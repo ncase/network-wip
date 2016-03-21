@@ -5,13 +5,13 @@
 (function(exports){
 
 // RANDO CONSTANTS
-var DRAW_RADIUS = 3;
-var RADIUS_PER_CONNECTION = 1.5;
+var DRAW_RADIUS = 4;
+var RADIUS_PER_CONNECTION = 2;
 var EDGE_LENGTH = 60;
 var HOOKES_CONSTANT = 0.01;
 var REPEL_CONSTANT = 400;
 var DAMPENING = 0.95;
-var GRAVITY = 0.1;
+var GRAVITY = 0.05;
 
 // Create the nodes, yo
 exports.nodes = [];
@@ -21,6 +21,7 @@ exports.Node = function(config){
 	
 	// Properties
 	self.id = config.id;
+	self.type = config.type;
 	self.x = config.x;
 	self.y = config.y;
 	self.vel = { x:0, y:0 };
@@ -32,15 +33,17 @@ exports.Node = function(config){
 	self.graphics = nodesSVG.group().attr({
 		cursor: "pointer"
 	});
+	self.color = Network.getNodeArt(self.type).color;
 	self.body = self.graphics.circle(0, 0, DRAW_RADIUS).attr({
-		fill: "#cc2727"
+		fill: self.color
 	});
 	self.label = self.graphics.text(0, DRAW_RADIUS, self.id).attr({
 		"text-anchor": "middle",
-		"font-size": 14,
+		"font-size": 7,
+		"font-weight": 100,
 		dy: -3,
-		fill: "#777",
-		fontWeight: 'normal'		
+		fill: self.color,
+		fontWeight: 'bold'		
 	});
 
 	// Draw
@@ -171,8 +174,8 @@ exports.Node = function(config){
 	// Draggable
 	self.isDragging = false;
 	var move = function(dx,dy) {
-		self.x = self.startDragX + dx;
-		self.y = self.startDragY + dy;
+		self.x = self.startDragX + dx/Network.matrix.a;
+		self.y = self.startDragY + dy/Network.matrix.d;
 		self.draw();
 	}
 	var start = function(){

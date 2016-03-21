@@ -28,72 +28,124 @@ Network.init({
 	art:{},
 	*/
 
+	art:{
+		nodes:{
+			ISIS:{
+				color: "#000000"
+			},
+			terrorist:{
+				color: "#888888"
+			},
+			kurds:{
+				color: "#9DBFA9"
+			},
+			regime_allies:{
+				color: "#A36969"
+			},
+			fsa_allies:{
+				color: "#6897B1"
+			}
+		},
+		edges:{
+			recruit:{
+				directional: true,
+				color: "inherit"
+			},
+			support:{
+				directional: true,
+				color: "inherit"
+			},
+			fighting:{
+				directional: false,
+				thickness: 6,
+				color: "#FF0000"
+			}
+		}
+	},
+
 	stages:[
+
+		// Al Qaeda
 		{
-			name: "1997",
+			nodes:[ {id:"Al Qaeda", type:"terrorist"} ],
+			edges:[]
+		},
+		{
+			nodes:[ {id:"Splinter 1", type:"terrorist"} ],
+			edges:[ {from:"Al Qaeda", to:"Splinter 1", type:"recruit"} ]
+		},
+		{
+			nodes:[ {id:"Splinter 2", type:"terrorist"} ],
+			edges:[ {from:"Al Qaeda", to:"Splinter 2", type:"recruit"} ]
+		},
+		{
+			nodes:[ {id:"Splinter 3", type:"terrorist"} ],
+			edges:[ {from:"Al Qaeda", to:"Splinter 3", type:"recruit"} ]
+		},
+		{
+			nodes:[ {id:"ISIS", type:"ISIS"} ],
+			edges:[ {from:"Al Qaeda", to:"ISIS", type:"recruit"} ]
+		},
+		{
+			nodes:[ {id:"Jabhat al-Nusra", type:"terrorist"} ],
+			edges:[ {from:"Al Qaeda", to:"Jabhat al-Nusra", type:"recruit"} ]
+		},
+
+		// Regime
+		{
 			nodes:[
-				{id:"Alice"},
-				{id:"Bob"}
+				{id:"Regime Loyalists", type:"regime_allies"},
+				{id:"Russia", type:"regime_allies"},
+				{id:"Hezbollah", type:"regime_allies"},
+				{id:"Iran", type:"regime_allies"}
 			],
 			edges:[
+				{from:"Russia", to:"Regime Loyalists", type:"support"},
+				{from:"Hezbollah", to:"Regime Loyalists", type:"support"},
+				{from:"Iran", to:"Regime Loyalists", type:"support"}
+			]
+		},
+
+		// FSA 
+		{
+			nodes:[
+				{id:"Free Syrian Army", type:"fsa_allies"},
+				{id:"US", type:"fsa_allies"},
+				{id:"Turkey", type:"fsa_allies"},
+				{id:"Gulf States", type:"fsa_allies"}
+			],
+			edges:[
+				{from:"US", to:"Free Syrian Army", type:"support"},
+				{from:"Turkey", to:"Free Syrian Army", type:"support"},
+				{from:"Gulf States", to:"Free Syrian Army", type:"support"}
+			]
+		},
+
+		// Kurds
+		{
+			nodes:[ {id:"Kurds", type:"kurds"} ],
+			edges:[]
+		},
+
+		// MUCH FIGHTING WOW
+		{
+			nodes:[],
+			edges:[
+				{from:"Jabhat al-Nusra", to:"Regime Loyalists", type:"fighting"},
+				{from:"Jabhat al-Nusra", to:"Free Syrian Army", type:"fighting"},
+				{from:"Regime Loyalists", to:"Free Syrian Army", type:"fighting"},
+				{from:"Kurds", to:"Free Syrian Army", type:"fighting"},
 			]
 		},
 		{
-			name: "1998",
-			nodes:[
-				{id:"Carol"}
-			],
+			nodes:[],
 			edges:[
-				{from:"Alice", to:"Carol"}
-			]
-		},
-		{
-			name: "1999",
-			nodes:[
-				{id:"Debbie"}
-			],
-			edges:[
-				{from:"Alice", to:"Debbie"}
-			]
-		},
-		{
-			name: "2000",
-			nodes:[
-				{id:"Erin"},
-				{id:"Fiona"},
-				{id:"Gary"},
-				{id:"Hannah"},
-				{id:"Izzy"},
-				{id:"Jackie"},
-				{id:"Kim"}
-			],
-			edges:[
-				{from:"Alice", to:"Erin"},
-				{from:"Alice", to:"Fiona"},
-				{from:"Alice", to:"Gary"},
-				{from:"Alice", to:"Hannah"},
-				{from:"Alice", to:"Izzy"},
-				{from:"Alice", to:"Jackie"},
-				{from:"Alice", to:"Kim"}
-			]
-		},
-		{
-			name: "2001",
-			nodes:[
-				{id:"Lindsay"},
-				{id:"Mark"},
-				{id:"Nicky"},
-				{id:"Olivia"},
-				{id:"Pat"}
-			],
-			edges:[
-				{from:"Bob", to:"Lindsay"},
-				{from:"Bob", to:"Mark"},
-				{from:"Bob", to:"Nicky"},
-				{from:"Bob", to:"Olivia"},
-				{from:"Bob", to:"Pat"}
+				{from:"Jabhat al-Nusra", to:"ISIS", type:"fighting"},
+				{from:"Regime Loyalists", to:"ISIS", type:"fighting"},
+				{from:"Kurds", to:"ISIS", type:"fighting"},
 			]
 		}
+
 	]
 
 });

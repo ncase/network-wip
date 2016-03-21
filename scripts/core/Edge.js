@@ -13,7 +13,7 @@ exports.Edge = function(config){
 	// Properties
 	self.from = config.from;
 	self.to = config.to;
-	self.bidirectional = true;
+	self.type = config.type;
 
 	// Tell the nodes we're connected now.
 	self.from.connections.push(self);
@@ -22,9 +22,11 @@ exports.Edge = function(config){
 	// Draw
 	var f = self.from;
 	var t = self.to;
+	var art = Network.getEdgeArt(self.type);
 	self.graphics = edgesSVG.line().attr({
-		stroke: "#eee",
-		strokeWidth: 3
+		stroke: (art.color=="inherit" ? self.from.color : art.color),
+		strokeWidth: art.thickness || 1,
+		opacity: (art.color=="inherit" ? 0.5 : 1)
 	});
 
 	// Update drawing
