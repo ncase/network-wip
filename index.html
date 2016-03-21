@@ -1,0 +1,101 @@
+<!doctype>
+<html>
+<head>
+	<title>networks!</title>
+	<link rel="stylesheet" type="text/css" href="styles/network.css">
+</head>
+<body>
+
+<svg id="model"></svg>
+<div id="next" onclick="Network.nextStage()">next stage</div>
+
+</body>
+</html>
+
+<!-- Network Code -->
+<script src="scripts/lib/snap.svg-min.js"></script>
+<script src="scripts/core/Node.js"></script>
+<script src="scripts/core/Edge.js"></script>
+<script src="scripts/core/Network.js"></script>
+
+<!-- Test Data -->
+<script>
+
+Network.init({
+
+	/*
+	How to draw the nodes & edges...
+	art:{},
+	*/
+
+	stages:[
+		{
+			name: "1997",
+			nodes:[
+				{id:"Alice"},
+				{id:"Bob"}
+			],
+			edges:[
+			]
+		},
+		{
+			name: "1998",
+			nodes:[
+				{id:"Carol"}
+			],
+			edges:[
+				{from:"Alice", to:"Carol"}
+			]
+		},
+		{
+			name: "1999",
+			nodes:[
+				{id:"Debbie"}
+			],
+			edges:[
+				{from:"Alice", to:"Debbie"}
+			]
+		},
+		{
+			name: "2000",
+			nodes:[
+				{id:"Erin"},
+				{id:"Fiona"},
+				{id:"Gary"},
+				{id:"Hannah"},
+				{id:"Izzy"},
+				{id:"Jackie"},
+				{id:"Kim"}
+			],
+			edges:[
+				{from:"Alice", to:"Erin"},
+				{from:"Alice", to:"Fiona"},
+				{from:"Alice", to:"Gary"},
+				{from:"Alice", to:"Hannah"},
+				{from:"Alice", to:"Izzy"},
+				{from:"Alice", to:"Jackie"},
+				{from:"Alice", to:"Kim"}
+			]
+		},
+		{
+			name: "2001",
+			nodes:[
+				{id:"Lindsay"},
+				{id:"Mark"},
+				{id:"Nicky"},
+				{id:"Olivia"},
+				{id:"Pat"}
+			],
+			edges:[
+				{from:"Bob", to:"Lindsay"},
+				{from:"Bob", to:"Mark"},
+				{from:"Bob", to:"Nicky"},
+				{from:"Bob", to:"Olivia"},
+				{from:"Bob", to:"Pat"}
+			]
+		}
+	]
+
+});
+
+</script>

@@ -1,84 +1,21 @@
-// RANDO CONSTANTS
-var DRAW_RADIUS = 5;
-var RADIUS_PER_CONNECTION = 2;
-var EDGE_LENGTH = 60;
-var HOOKES_CONSTANT = 0.01;
-var REPEL_CONSTANT = 400;
-var DAMPENING = 0.9;
-
-// ALWAYS DO THIS
-Math.TAU = Math.PI*2;
-
-/////////////////
-///// MODEL /////
-/////////////////
-
-// Create a model + centered container SVG.
-var modelSVG = Snap("#model");
-var matrix = new Snap.Matrix();
-matrix.translate(modelSVG.node.clientWidth/2, modelSVG.node.clientHeight/2);
-var containerSVG = modelSVG.group().attr({ transform:matrix });
-
-/////////////////
-///// EDGES /////
-/////////////////
-
-// Create the connections, yo
-var edgesSVG = containerSVG.group();
-var edges = [];
-function Edge(config){
-
-	var self = this;
-
-	// Properties
-	self.from = config.from;
-	self.to = config.to;
-	self.bidirectional = true;
-
-	// Tell the nodes we're connected now.
-	self.from.connections.push(self);
-	self.to.connections.push(self);
-
-	// Draw
-	var f = self.from;
-	var t = self.to;
-	self.graphics = edgesSVG.line().attr({
-		stroke: "#eee",
-		strokeWidth: 3
-	});
-
-	// Update drawing
-	self.draw = function(){
-		var f = self.from;
-		var t = self.to;
-		self.graphics.attr({
-			x1: f.x,
-			y1: f.y,
-			x2: t.x,
-			y2: t.y
-		});
-	};
-	self.draw();
-
-}
-
 /////////////////
 ///// NODES /////
 /////////////////
 
+(function(exports){
+
+// RANDO CONSTANTS
+var DRAW_RADIUS = 3;
+var RADIUS_PER_CONNECTION = 1.5;
+var EDGE_LENGTH = 60;
+var HOOKES_CONSTANT = 0.01;
+var REPEL_CONSTANT = 400;
+var DAMPENING = 0.95;
+var GRAVITY = 0.1;
+
 // Create the nodes, yo
-var nodesSVG = containerSVG.group();
-var nodes = [];
-function getNodeById(id){
-	for(var i=0;i<nodes.length;i++){
-		var node = nodes[i];
-		if(node.id==id) return node;
-	}
-	return null;
-}
-function stringToRGB(string){
-}
-function Node(config){
+exports.nodes = [];
+exports.Node = function(config){
 	
 	var self = this;
 	
@@ -130,14 +67,14 @@ function Node(config){
 	self.draw();
 
 	// Update
-	self.springTo = function(other){
+	self.springTo = function(other, edgeLength, hookesConstant){
 
 		// How much force
 		var dx = self.x - other.x;
 		var dy = self.y - other.y;
 		var distance = Math.sqrt(dx*dx+dy*dy);
-		var displacement = EDGE_LENGTH - distance;
-		var force = HOOKES_CONSTANT * displacement;
+		var displacement = edgeLength - distance;
+		var force = hookesConstant * displacement;
 
 		// In what direction
 		var ux = dx/distance;
@@ -154,9 +91,9 @@ function Node(config){
 			// Who are NOT connected to me?
 			var notConnected = nodes.slice(0,nodes.length); // clones it
 			notConnected.splice(notConnected.indexOf(self),1); // NOT SELF
-
+			
 			// Spring to the center
-			//self.springTo({x:0, y:0});
+			self.springTo({x:0, y:0}, 0, 0.002);
 
 			// Hooke's Law on connected
 			for(var i=0;i<self.connections.length;i++){
@@ -169,7 +106,7 @@ function Node(config){
 				notConnected.splice(notConnected.indexOf(other),1);
 
 				// Spring to
-				self.springTo(other);			
+				self.springTo(other, EDGE_LENGTH, HOOKES_CONSTANT);			
 
 			}
 
@@ -182,14 +119,8 @@ function Node(config){
 				var dy = self.y - other.y;
 				if(dx==0 && dy==0) dx=0.1; // edge case - do NOT overlap totally
 				var distanceSquared = dx*dx+dy*dy;
-				if(distanceSquared<10) distanceSquared=10; // stop that asymptote
+				if(distanceSquared<100) distanceSquared=100; // stop that asymptote
 				var force = REPEL_CONSTANT/distanceSquared;
-
-				// If far away enough, forget it
-				/*var stopDistanceSquared = 9*EDGE_LENGTH*EDGE_LENGTH;
-				var stoppit = (stopDistanceSquared-distanceSquared)/stopDistanceSquared;
-				if(stoppit<0) stoppit=0;
-				force *= stoppit;*/
 
 				// In what direction
 				var distance = Math.sqrt(distanceSquared);
@@ -254,98 +185,14 @@ function Node(config){
 	}
 	self.graphics.drag(move, start, end);
 
-}
-
-//////////////////////////
-// CREATING THE NETWORK //
-//////////////////////////
-
-var editorDOM = document.getElementById("editor");
-function parseEditor(){
-
-	var fulltext = editorDOM.value;
-	var rows = fulltext.split("\n");
-
-	// Split & Parse
-	var nodes = [];
-	for(var i=0;i<rows.length;i++){
-
-		// Parse row
-		rows[i] = rows[i].split(/\,\s*/); // comma, maybe a space afterwards
-		var row = rows[i];
-
-		// If wrong, just scrape off, like mold on bread
-		if(row.length!=2){
-			rows.splice(i,1);
-			i--;
-		}else{
-
-			// Does it have new names? If so, add 'em to the node list.
-			if(nodes.indexOf(row[0])<0) nodes.push(row[0]);
-			if(nodes.indexOf(row[1])<0) nodes.push(row[1]);
-
-		}
-	}
-
-	// Return, yo
-	return {
-		nodes: nodes,
-		edges: rows
-	};
-
-}
-editorDOM.onblur = function(){
-	init();
 };
 
-function init(){
-
-	// Clear arrays
-	nodesSVG.clear();
-	edgesSVG.clear();
-	nodes = [];
-	edges = [];
-
-	// Parse Editor!
-	var config = parseEditor();
-
-	// Create nodes
-	for(var i=0; i<config.nodes.length; i++){
-		var node = new Node({
-			id: config.nodes[i],
-			x: Math.random()*50-25,
-			y: Math.random()*50-25
-		});
-		nodes.push(node);
-	}
-
-	// Connect nodes
-	for(var i=0; i<config.edges.length; i++){
-		var e = config.edges[i];
-		var edge = new Edge({
-			from: getNodeById(e[0]),
-			to: getNodeById(e[1])
-		});
-		edges.push(edge);
-	}
-
-}
-
-window.onload = init;
-
-
-// RANDOM UPDATING
-var updateIndex = 0;
-function update(){
-
-	// Update all nodes, nerd
+exports.Node.getById = function(id){
 	for(var i=0;i<nodes.length;i++){
 		var node = nodes[i];
-		node.update();
-		node.draw();
+		if(node.id==id) return node;
 	}
+	return null;
+};
 
-}
-
-setInterval(update,1000/60);
-
+})(window);
